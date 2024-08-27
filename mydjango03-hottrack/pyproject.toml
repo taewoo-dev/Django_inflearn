@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "mydjango03-hottrack"
+version = "0.1.0"
+description = ""
+authors = ["taewoo-dev <twin9774@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+black = "^24.8.0"
+django = "^4.2.9"
+django-debug-toolbar = "^4.4.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
