@@ -1,11 +1,15 @@
 import json
+from io import BytesIO
+from typing import Literal
 from urllib.request import urlopen
 
+import pandas as pd
 from django.db.models import QuerySet, Q
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
+from django.shortcuts import render, get_object_or_404
 
 from hot_track.models import Song
+from hot_track.utils.cover import make_cover_image
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -39,3 +43,48 @@ def index(request: HttpRequest) -> HttpResponse:
             "query": query,
         },
     )
+
+
+def cover_png(request, pk):
+    # 최대값 512, 기본값 256
+    canvas_size = min(512, int(request.GET.get("size", 256)))
+
+    song = get_object_or_404(Song, pk=pk)
+
+    cover_image = make_cover_image(
+        song.cover_url, song.artist_name, canvas_size=canvas_size
+    )
+
+    # param fp : filename (str), pathlib.Path object or file object
+    # image.save("image.png")
+    response = HttpResponse(content_type="image/png")
+    cover_image.save(response, format="png")
+
+    return response
+
+
+def export(request: HttpRequest, format: Literal["csv", "xlsx"]) -> HttpResponse:
+    song_qs = Song.objects.all()
+    song_qs = song_qs.values()
+    df = pd.DataFrame(data=song_qs)
+
+    export_file = BytesIO()
+
+    if format == "csv":
+        content_type = "text/csv"
+        filename = "hottrack.csv"
+        df.to_csv(path_or_buf=export_file, index=False, encoding="utf-8-sig")  # noqa
+    elif format == "xlsx":
+        # .xls : application/vnd.ms-excel
+        content_type = (
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"  # xlsx
+        )
+        filename = "hottrack.xlsx"
+        df.to_excel(excel_writer=export_file, index=False, engine="openpyxl")  # noqa
+    else:
+        return HttpResponseBadRequest(f"Invalid format : {format}")
+
+    response = HttpResponse(content=export_file.getvalue(), content_type=content_type)
+    response["Content-Disposition"] = "attachment; filename*=utf-8''{}".format(filename)
+
+    return response
