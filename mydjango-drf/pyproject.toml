@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "mydjango-drf"
+version = "0.1.0"
+description = ""
+authors = ["taewoo-dev <twin9774@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "4.2"
+black = "^24.8.0"
+django-debug-toolbar = "4.3"
+django-extensions = "^3.2.3"
+ipython = "^8.27.0"
+django-environ = "^0.11.2"
+djangorestframework = "^3.15.2"
+faker = "^28.1.0"
+tqdm = "^4.66.5"
+pandas = "^2.2.2"
+openpyxl = "^3.1.5"
+wordcloud = "^1.9.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
