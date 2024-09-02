@@ -166,5 +166,5 @@ REST_FRAMEWORK = {
         "blog.renderers.PandasXlsxRenderer",
         "blog.renderers.WordcloudRenderer",
     ),
-    "DEFAULT_PARSER_CLASSES": ("rest_framework.parsers.JSONParser",),
+    # "DEFAULT_PARSER_CLASSES": ("rest_framework.parsers.JSONParser",),
 }

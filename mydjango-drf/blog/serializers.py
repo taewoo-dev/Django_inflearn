@@ -10,6 +10,10 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ["id", "title", "content"]
 
+    @staticmethod
+    def get_optimized_queryset() -> QuerySet[Post]:
+        return Post.objects.all()
+
 
 class AuthorSerializer(serializers.ModelSerializer):
     # serializer의 매서드 필드는 default로 get_fieldname을 찾아서 자동호출하여 field를 만든다
