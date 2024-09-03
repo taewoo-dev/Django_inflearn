@@ -6,6 +6,7 @@ from rest_framework.generics import (
     RetrieveAPIView,
     CreateAPIView,
     UpdateAPIView,
+    DestroyAPIView,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
@@ -13,25 +14,13 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 
-from .mixins import JsonResponseMixin
+from .mixins import JsonResponseMixin, PermissionDebugMixin
 from .models import Post
+from .permissions import IsAuthorOrReadonly
 from .serializers import PostSerializer, PostListSerializer, PostDetailSerializer
 
 
-# @api_view(["GET"])
-# def post_list(request: Request) -> Response:
-#     # post_list에서 외래키 참조에 대한 n+1 문제 발생 -> select_related를 이용하여 즉시 가져오기
-#     post_qs = Post.objects.all().select_related("author")
-#
-#     serializer = PostListSerializer(instance=post_qs, many=True)
-#     list_data: ReturnList = serializer.data
-#     return Response(list_data)
-
-
-# JsonResponse(post_qs, safe=False) 장고 기본에서는 qs객체 지원 x -> 리스트로 변환
-
-
-class PostListAPIView(JsonResponseMixin, ListAPIView):
+class PostListAPIView(JsonResponseMixin, PermissionDebugMixin, ListAPIView):
     queryset = PostListSerializer.get_optimized_queryset()
     serializer_class = PostListSerializer
 
@@ -39,16 +28,7 @@ class PostListAPIView(JsonResponseMixin, ListAPIView):
 post_list = PostListAPIView.as_view()
 
 
-# @api_view(["GET"])
-# def post_detail(request: Request, pk: int) -> Response:
-#     post = get_object_or_404(Post, pk=pk)
-#     serialize = PostDetailSerializer(instance=post)
-#     detail_data: ReturnDict = serialize.data
-#
-#     return Response(detail_data)
-
-
-class PostRetrieveAPIView(JsonResponseMixin, RetrieveAPIView):
+class PostRetrieveAPIView(JsonResponseMixin, PermissionDebugMixin, RetrieveAPIView):
     queryset = PostDetailSerializer.get_optimized_queryset()
     serializer_class = PostDetailSerializer
 
@@ -56,9 +36,9 @@ class PostRetrieveAPIView(JsonResponseMixin, RetrieveAPIView):
 post_detail = PostRetrieveAPIView.as_view()
 
 
-class PostCreateAPIView(CreateAPIView):
+class PostCreateAPIView(PermissionDebugMixin, CreateAPIView):
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthorOrReadonly]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -67,13 +47,21 @@ class PostCreateAPIView(CreateAPIView):
 post_new = PostCreateAPIView().as_view()
 
 
-class PostUpdateAPIView(UpdateAPIView):
+class PostUpdateAPIView(PermissionDebugMixin, UpdateAPIView):
     queryset = PostSerializer.get_optimized_queryset()
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthorOrReadonly]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
 
 post_edit = PostUpdateAPIView.as_view()
+
+
+class PostDestroyAPIView(PermissionDebugMixin, DestroyAPIView):
+    queryset = PostSerializer.get_optimized_queryset()
+    permission_classes = [IsAuthorOrReadonly]
+
+
+post_delete = PostDestroyAPIView.as_view()

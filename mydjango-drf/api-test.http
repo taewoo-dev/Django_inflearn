@@ -61,8 +61,13 @@ content=샘플+내용
 
 ### (수정/PATCH) 성공하는 form-urlencoded (업데이트할 필드만 지정)
 
-PATCH {{BASE_URL}}/blog/api/101/edit/
+PATCH {{BASE_URL}}/blog/api/103/edit/
 Authorization: Basic gimtaeu qwerasd
 Content-Type: application/x-www-form-urlencoded
 
 title=샘플+제목+수정2
+
+### (삭제/DELETE)
+
+DELETE {{BASE_URL}}/blog/api/103/delete/
+Authorization: Basic gimtaeu qwerasd

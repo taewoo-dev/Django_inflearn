@@ -9,6 +9,7 @@ urlpatterns_api_v1 = [
     path(route="<int:pk>/", view=api.post_detail, name="post_detail"),
     path(route="new/", view=api.post_new, name="post_new"),
     path(route="<int:pk>/edit/", view=api.post_edit, name="post_edit "),
+    path(route="<int:pk>/delete/", view=api.post_delete, name="post_delete "),
 ]
 
 urlpatterns += [
