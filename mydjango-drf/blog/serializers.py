@@ -19,8 +19,8 @@ class AuthorSerializer(serializers.ModelSerializer):
     # serializer의 매서드 필드는 default로 get_fieldname을 찾아서 자동호출하여 field를 만든다
     name = serializers.SerializerMethodField()
 
-    def get_name(self, user) -> str:
-        return f"{user.last_name}{user.first_name}".strip()
+    def get_name(self, instance: User) -> str:
+        return f"{instance.last_name}{instance.first_name}".strip()
 
     class Meta:
         model = User

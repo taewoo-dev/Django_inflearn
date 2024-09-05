@@ -32,7 +32,9 @@ class JsonResponseMixin:
                     "ok": is_ok,
                     "result": response.data,  # ReturnDict Type
                 },
-                serializer=response.data.serializer,  # 원본 데이터의 serializer를 참조해서 지정
+                serializer=getattr(
+                    response.data, "serializer", None
+                ),  # 원본 데이터의 serializer를 참조해서 지정
             )
         return super().finalize_response(request, response, *args, **kwargs)
 

@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 
 OWN_APPS = [
     "blog",
+    "accounts",
 ]
 
 DJANGO_APPS = [
@@ -136,6 +137,9 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
+# Custom User Model
+AUTH_USER_MODEL = "accounts.User"
+
 # django-debug-toolbar settings
 
 if DEBUG:
@@ -160,11 +164,16 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
     ],
+    # renderer settings
     "DEFAULT_RENDERER_CLASSES": (
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
         "blog.renderers.PandasXlsxRenderer",
         "blog.renderers.WordcloudRenderer",
     ),
+    # parser settings
     # "DEFAULT_PARSER_CLASSES": ("rest_framework.parsers.JSONParser",),
+    # paginator settings
+    "PAGE_SIZE": 10,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
 }

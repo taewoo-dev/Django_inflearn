@@ -6,7 +6,7 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 
 
-class IsAuthorOrReadonly(permissions.BasePermission):
+class IsAuthorOrReadOnly(permissions.BasePermission):
     def has_permission(self, request: Request, view: APIView) -> bool:
         # 조회 API에 대해서는 True 반환
         if request.method in permissions.SAFE_METHODS:

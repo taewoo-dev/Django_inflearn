@@ -21,12 +21,20 @@ class Command(BaseCommand):
         post_list = []
         comment_list = []
 
+        # for __ in tqdm(range(10), desc="유저 생성"):
+        #     username = fake.email().split("@")[0]
+        #     password = (
+        #         username  # 이후 API 테스트할 때, 인증을 위해 유저명으로 암호 설정
+        #     )
+        #     user = User.objects.create_user(username=username, password=password)
+        #     user_list.append(user)
         for __ in tqdm(range(10), desc="유저 생성"):
-            username = fake.email().split("@")[0]
-            password = (
-                username  # 이후 API 테스트할 때, 인증을 위해 유저명으로 암호 설정
+            email = fake.email()
+            password = email  # 이후 API 테스트할 때, 인증을 위해 유저명으로 암호 설정
+            nickname = fake.user_name()
+            user = User.objects.create_user(
+                email=email, password=password, nickname=nickname
             )
-            user = User.objects.create_user(username=username, password=password)
             user_list.append(user)
 
         for __ in tqdm(range(100), desc="포스팅 생성"):

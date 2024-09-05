@@ -8,6 +8,7 @@ from rest_framework.generics import (
     UpdateAPIView,
     DestroyAPIView,
 )
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.request import Request
@@ -16,13 +17,14 @@ from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 
 from .mixins import JsonResponseMixin, PermissionDebugMixin
 from .models import Post
-from .permissions import IsAuthorOrReadonly
+from .permissions import IsAuthorOrReadOnly
 from .serializers import PostSerializer, PostListSerializer, PostDetailSerializer
 
 
 class PostListAPIView(JsonResponseMixin, PermissionDebugMixin, ListAPIView):
     queryset = PostListSerializer.get_optimized_queryset()
     serializer_class = PostListSerializer
+    pagination_class = LimitOffsetPagination
 
 
 post_list = PostListAPIView.as_view()
@@ -38,10 +40,17 @@ post_detail = PostRetrieveAPIView.as_view()
 
 class PostCreateAPIView(PermissionDebugMixin, CreateAPIView):
     serializer_class = PostSerializer
-    permission_classes = [IsAuthorOrReadonly]
+    permission_classes = [IsAuthorOrReadOnly]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    def create(self, request, *args, **kwargs) -> Response:
+        response = super().create(request, *args, **kwargs)
+        # Serivice 쪽에서 비지니스 로직을 처리
+        pass
+
+        return response
 
 
 post_new = PostCreateAPIView().as_view()
@@ -50,7 +59,7 @@ post_new = PostCreateAPIView().as_view()
 class PostUpdateAPIView(PermissionDebugMixin, UpdateAPIView):
     queryset = PostSerializer.get_optimized_queryset()
     serializer_class = PostSerializer
-    permission_classes = [IsAuthorOrReadonly]
+    permission_classes = [IsAuthorOrReadOnly]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -61,7 +70,7 @@ post_edit = PostUpdateAPIView.as_view()
 
 class PostDestroyAPIView(PermissionDebugMixin, DestroyAPIView):
     queryset = PostSerializer.get_optimized_queryset()
-    permission_classes = [IsAuthorOrReadonly]
+    permission_classes = [IsAuthorOrReadOnly]
 
 
 post_delete = PostDestroyAPIView.as_view()
