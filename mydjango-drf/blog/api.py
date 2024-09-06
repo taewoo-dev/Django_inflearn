@@ -45,13 +45,6 @@ class PostCreateAPIView(PermissionDebugMixin, CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def create(self, request, *args, **kwargs) -> Response:
-        response = super().create(request, *args, **kwargs)
-        # Serivice 쪽에서 비지니스 로직을 처리
-        pass
-
-        return response
-
 
 post_new = PostCreateAPIView().as_view()
 

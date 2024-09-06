@@ -1,21 +1,31 @@
 from django.urls import path, include
 from . import views
-from .api import (
+from .views import (
     UserRegistrationAPIView,
-    UserLoginAPIView,
     PasswordChangeAPIView,
     PasswordResetAPIView,
     UserDetailAPIView,
     UserListAPIView,
     UserDeactivationAPIView,
     UserTokenAPIView,
+    UserSessionLoginAPIView,
+    UserSessionLogoutAPIView,
 )
 
 urlpatterns = [
     path(
         "register/", UserRegistrationAPIView.as_view(), name="user-register"
     ),  # 회원가입
-    path("login/", UserLoginAPIView.as_view(), name="user-login"),  # 로그인
+    path(
+        "login/", UserSessionLoginAPIView.as_view(), name="user-login"
+    ),  # session 로그인
+    path(
+        "logout/", UserSessionLogoutAPIView.as_view(), name="user-logout"
+    ),  # session 로그아웃
+    # simple JWT
+    # path("login/simpleJWT", TokenObtainPairView.as_view()),
+    # path("login/simpleJWT/refresh", TokenRefreshView.as_view()),
+    # path("login/simpleJWT/verify", TokenVerifyView.as_view()),
     # path('password-change/', PasswordChangeAPIView.as_view(), name='password-change'),  # 비밀번호 변경
     # path('password-reset/', PasswordResetAPIView.as_view(), name='password-reset'),  # 비밀번호 초기화
     # path('profile/', UserDetailAPIView.as_view(), name='user-detail'),  # 유저 프로필 조회 및 수정
