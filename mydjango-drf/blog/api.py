@@ -40,7 +40,7 @@ post_detail = PostRetrieveAPIView.as_view()
 
 class PostCreateAPIView(PermissionDebugMixin, CreateAPIView):
     serializer_class = PostSerializer
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthorOrReadOnly, IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

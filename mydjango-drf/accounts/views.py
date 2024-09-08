@@ -1,10 +1,10 @@
-from django.contrib.auth import login, logout
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 
+from accounts.managers import AuthenticationManager
 from accounts.models import User
 from accounts.serializers import UserRegistrationSerializer, UserLoginSerializer
 
@@ -30,58 +30,45 @@ class UserRegistrationAPIView(GenericAPIView):
         )
 
 
-# session 로그인 API
-class UserSessionLoginAPIView(GenericAPIView):
+# 로그인 API
+class UserLoginAPIView(GenericAPIView):
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
             user = serializer.validated_data["user"]
-            login(request, user)
-            # JWT 토큰 생성
-            access, refresh = self.get_jwt_token(user)
+
+            auth_manager = AuthenticationManager()
+            auth_manager.login(request, user)
+            access, refresh = auth_manager.get_token(user)
+
             return Response(
                 {
                     "message": "Login successful",
-                    "user": {
-                        "id": user.id,
-                        "email": user.email,
-                        "nickname": user.nickname,
-                    },
-                    "refresh": str(refresh),
-                    "access": str(access),
+                    "access": access,
+                    "refresh": refresh,
                 },
                 status=status.HTTP_200_OK,
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_jwt_token(self, user):
-        refresh = RefreshToken.for_user(user)
-        access = refresh.access_token
-        return access, refresh
 
-
-# session 로그아웃 API
-class UserSessionLogoutAPIView(GenericAPIView):
+# 로그아웃 API
+class UserLogoutAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        logout(request)
+
+        refresh_token = request.data.get("refresh")
+
+        auth_manager = AuthenticationManager()
+        auth_manager.logout(refresh_token)
+
         return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
-
-
-# jwt 로그인 API
-class UserJwtLoginAPIView(GenericAPIView):
-    pass
-
-
-# jwt 로그아웃 API
-class UserJwtLogoutView(GenericAPIView):
-    pass
 
 
 # 비밀번호 API

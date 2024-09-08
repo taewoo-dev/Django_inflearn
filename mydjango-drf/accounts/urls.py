@@ -8,20 +8,16 @@ from .views import (
     UserListAPIView,
     UserDeactivationAPIView,
     UserTokenAPIView,
-    UserSessionLoginAPIView,
-    UserSessionLogoutAPIView,
+    UserLogoutAPIView,
+    UserLoginAPIView,
 )
 
 urlpatterns = [
     path(
         "register/", UserRegistrationAPIView.as_view(), name="user-register"
     ),  # 회원가입
-    path(
-        "login/", UserSessionLoginAPIView.as_view(), name="user-login"
-    ),  # session 로그인
-    path(
-        "logout/", UserSessionLogoutAPIView.as_view(), name="user-logout"
-    ),  # session 로그아웃
+    path("login/", UserLoginAPIView.as_view(), name="user-login"),  # 로그인
+    path("logout/", UserLogoutAPIView.as_view(), name="user-logout"),  # 로그아웃
     # simple JWT
     # path("login/simpleJWT", TokenObtainPairView.as_view()),
     # path("login/simpleJWT/refresh", TokenRefreshView.as_view()),
