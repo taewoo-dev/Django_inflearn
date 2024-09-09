@@ -3,9 +3,6 @@ from typing import Optional, Tuple
 from django.contrib.auth.base_user import BaseUserManager
 from rest_framework.request import Request
 
-from accounts.models import User
-from accounts.services import LoginService, LogoutService, TokenService, EmailService
-
 
 class UserManger(BaseUserManager):
     def create_user(self, email, password, nickname):
@@ -16,7 +13,6 @@ class UserManger(BaseUserManager):
         )
         user.nickname = nickname
         user.set_password(password)
-        user.is_active = True
         user.save(using=self._db)
         return user
 
@@ -28,20 +24,15 @@ class UserManger(BaseUserManager):
         return user
 
 
-class AuthenticationManager:
-    login_service = LoginService()
-    logout_service = LogoutService()
-    token_service = TokenService()
-    email_service = EmailService()
-
-    def login(self, request: Request, user: User) -> None:
-        self.login_service.perform_login(request, user)
-
-    def logout(self, request: Request, refresh_token: Optional[str] = None) -> None:
-        self.logout_service.perform_logout(request)
-
-        if refresh_token:
-            self.token_service.blacklist_refresh_token(refresh_token)
-
-    def get_token(self, user: User) -> Tuple[str, str]:
-        return self.token_service.generate_jwt_token(user)
+# class AuthenticationManager:
+#
+#     token_service = TokenService()
+#     email_service = EmailService()
+#
+#     self.token_service.blacklist_refresh_token(refresh_token)
+#
+#     def get_token(self, user: User) -> Tuple[str, str]:
+#         return self.token_service.generate_jwt_token(user)
+#
+#     def handle_email_verification(self, user: User):
+#         pass

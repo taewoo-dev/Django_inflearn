@@ -10,12 +10,14 @@ from .views import (
     UserTokenAPIView,
     UserLogoutAPIView,
     UserLoginAPIView,
+    VerifyEmailAPIView,
 )
 
 urlpatterns = [
     path(
         "register/", UserRegistrationAPIView.as_view(), name="user-register"
     ),  # 회원가입
+    path("verify/", VerifyEmailAPIView.as_view(), name="verfiy-email"),
     path("login/", UserLoginAPIView.as_view(), name="user-login"),  # 로그인
     path("logout/", UserLogoutAPIView.as_view(), name="user-logout"),  # 로그아웃
     # simple JWT
