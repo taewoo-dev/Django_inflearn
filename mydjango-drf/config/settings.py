@@ -207,3 +207,7 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv("EMAIL")
 EMAIL_HOST_PASSWORD = os.getenv("PASSWORD")
+
+# Oauth settings
+NAVER_CLIENT_ID = os.getenv("CLIENT_ID")
+NAVER_SECRET = os.getenv("CLIENT_SECRET")

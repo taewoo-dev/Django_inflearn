@@ -1,5 +1,6 @@
 from django.urls import path, include
 from . import views
+from .oauth_views import NaverLoginRedirectView, NaverCallBackView
 from .views import (
     UserRegistrationAPIView,
     PasswordChangeAPIView,
@@ -17,7 +18,7 @@ urlpatterns = [
     path(
         "register/", UserRegistrationAPIView.as_view(), name="user-register"
     ),  # 회원가입
-    path("verify/", VerifyEmailAPIView.as_view(), name="verfiy-email"),
+    path("verify/", VerifyEmailAPIView.as_view(), name="verfiy-email"),  # 이메일 인증
     path("login/", UserLoginAPIView.as_view(), name="user-login"),  # 로그인
     path("logout/", UserLogoutAPIView.as_view(), name="user-logout"),  # 로그아웃
     # simple JWT
@@ -30,4 +31,9 @@ urlpatterns = [
     # path('users/', UserListAPIView.as_view(), name='user-list'),  # 유저 목록 조회 (관리자)
     # path('deactivate/', UserDeactivationAPIView.as_view(), name='user-deactivate'),  # 유저 비활성화
     # path('token/', UserTokenAPIView.as_view(), name='user-token'),  # JWT 토큰 생성
+    # Oauth url
+    path(
+        "naver/login", NaverLoginRedirectView.as_view(), name="naver-login"
+    ),  # Naver Login
+    path("naver/callback/", NaverCallBackView.as_view(), name="naver-callback"),
 ]

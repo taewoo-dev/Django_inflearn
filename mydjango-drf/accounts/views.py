@@ -1,5 +1,7 @@
 from django.contrib.auth import login, logout
+
 from django.core.signing import SignatureExpired, BadSignature
+
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -31,10 +33,12 @@ class UserRegistrationAPIView(GenericAPIView):
         )
 
         email = validated_data.get("email")
+        scheme = self.request.scheme
+        meta = self.request.META
 
         token = self.email_service.create_signed_email_token(email)
         subject, message = self.email_service.get_verification_email_content(
-            self.request.scheme, self.request.META, token
+            scheme, meta, token
         )
         self.email_service.send_email(subject, message, email)
 
@@ -49,8 +53,8 @@ class UserRegistrationAPIView(GenericAPIView):
 
 # 이메일 인증 API
 class VerifyEmailAPIView(APIView):
-    email_service = EmailService()
     permission_classes = [AllowAny]
+    email_service = EmailService()
 
     def get(self, request: Request, *args, **kwargs) -> Response:
         token = request.GET.get("token", "")
