@@ -42,33 +42,20 @@ class NaverCallBackView(GenericAPIView):
         state = validated_data.get("state")
 
         access_token = self.social_service.get_access_token(code, state)
-
         profile_response = self.social_service.get_profile_json(access_token)
-
         profile_data = profile_response.get("response")
-
         email = profile_data.get("email")
 
-        user = User.get_user_by_email(email=email)
+        user = self.social_service.handle_user_by_email(email)
 
-        # 해당 email의 유저가 이미 있는 경우
         if user:
-            if not user.is_active:
-                user.is_active = True
-                user.save()
             login(request, user)
+            return Response({"message": "successful Login"}, status=status.HTTP_200_OK)
+        else:
             return Response(
-                {"message": "successful Naver Login"}, status=status.HTTP_200_OK
+                {"error": "User could not be created"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-
-        # 새로운 유저 생성, nickname 설정 api는 따로 설계,
-        user = User.objects.create_social_user(email=email)
-        login(request, user)
-
-        return Response(
-            {"message": "successful Sign up and Login !!"},
-            status=status.HTTP_201_CREATED,
-        )
 
 
 # KakaoRedirectAPIView 로그인 창으로 redirect
@@ -90,34 +77,23 @@ class KakaoCallBackView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
 
         validated_data = serializer.validated_data
-
         code = validated_data.get("code")
 
         access_token = self.social_service.get_access_token(code)
-
         profile_response = self.social_service.get_profile_json(access_token)
-
         user_data = profile_response.get("kakao_account")
-
         email = user_data.get("email")
 
-        user = User.get_user_by_email(email=email)
+        user = self.social_service.handle_user_by_email(email)
+
         if user:
-            if not user.is_active:
-                user.is_active = True
-                user.save()
             login(request, user)
+            return Response({"message": "successful Login"}, status=status.HTTP_200_OK)
+        else:
             return Response(
-                {"message": "successful Kakao Login"}, status=status.HTTP_200_OK
+                {"error": "User could not be created"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-
-        user = User.objects.create_social_user(email=email)
-        login(request, user)
-
-        return Response(
-            {"message": "successful Sign up and Login !!"},
-            status=status.HTTP_201_CREATED,
-        )
 
 
 # GoogleRedirectAPIView 로그인 창으로 redirect
@@ -139,35 +115,19 @@ class GoogleCallBackView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
 
         validated_data = serializer.validated_data
-
         code = validated_data.get("code")
 
         access_token = self.social_service.get_access_token(code)
-
-        print(access_token)
-
         profile_response = self.social_service.get_profile_json(access_token)
-
-        print(profile_response)
-
         email = profile_response.get("email")
 
-        print(email)
+        user = self.social_service.handle_user_by_email(email)
 
-        user = User.get_user_by_email(email=email)
         if user:
-            if not user.is_active:
-                user.is_active = True
-                user.save()
             login(request, user)
+            return Response({"message": "successful Login"}, status=status.HTTP_200_OK)
+        else:
             return Response(
-                {"message": "successful Kakao Login"}, status=status.HTTP_200_OK
+                {"error": "User could not be created"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-
-        user = User.objects.create_social_user(email=email)
-        login(request, user)
-
-        return Response(
-            {"message": "successful Sign up and Login !!"},
-            status=status.HTTP_201_CREATED,
-        )
