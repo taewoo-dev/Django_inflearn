@@ -1,9 +1,5 @@
-# Oauth Naver 로그인 API
-from urllib.parse import urlencode
-
-import requests
 from django.contrib.auth import login
-from django.core import signing
+
 from django.views.generic import RedirectView
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
@@ -13,34 +9,26 @@ from rest_framework.response import Response
 
 from accounts.models import User
 from accounts.oauth_serializer import NaverCallBackSerializer
-from config import settings
-
-NAVER_CALLBACK_URL = "/accounts/naver/callback/"
-NAVER_STATE = "naver_login"
-NAVER_LOGIN_URL = "https://nid.naver.com/oauth2.0/authorize"
-NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token"
-NAVER_PROFILE_URL = "https://openapi.naver.com/v1/nid/me"
+from accounts.services import NaverSocialLoginService
 
 
-# NaverRedirectAPIView
+# NaverRedirectAPIView 로그인 창으로 redirect
 class NaverLoginRedirectView(RedirectView):
-    def get_redirect_url(self, *args, **kwargs):
+    social_service = NaverSocialLoginService()
+
+    def get_redirect_url(self, *args, **kwargs) -> str:
         domain = self.request.scheme + "://" + self.request.META.get("HTTP_HOST", "")
-        callback_url = domain + NAVER_CALLBACK_URL
-        state = signing.dumps(NAVER_STATE)
-        print(callback_url)
-        params = {
-            "response_type": "code",
-            "client_id": settings.NAVER_CLIENT_ID,
-            "redirect_uri": callback_url,
-            "state": state,
-        }
-        return f"{NAVER_LOGIN_URL}?{urlencode(params)}"
+
+        login_url = self.social_service.generate_naver_login_url(domain=domain)
+
+        return login_url
 
 
+# NaverCallBackAPIView 로그인 and 회원가입
 class NaverCallBackView(GenericAPIView):
     serializer_class = NaverCallBackSerializer
     permission_classes = [AllowAny]
+    social_service = NaverSocialLoginService()
 
     def get(self, request: Request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.query_params)
@@ -51,35 +39,19 @@ class NaverCallBackView(GenericAPIView):
         code = validated_data.get("code")
         state = validated_data.get("state")
 
-        params = {
-            "grant_type": "authorization_code",
-            "client_id": settings.NAVER_CLIENT_ID,
-            "client_secret": settings.NAVER_SECRET,
-            "code": code,
-            "state": state,
-        }
+        access_token = self.social_service.get_naver_access_token(code, state)
 
-        response = requests.get(NAVER_TOKEN_URL, params=params)
-        result = response.json()
+        # 요청에 대한 응답이 잘못되었을 경우에 대한 예외처리
+        # if access_token == None:
+        #     return Response({}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        access_token = result.get("access_token")
+        profile_response = self.social_service.get_naver_profile(access_token)
 
-        headers = {
-            "Authorization": f"Bearer {access_token}",
-        }
+        email = profile_response.get("email")
 
-        response = requests.get(NAVER_PROFILE_URL, headers=headers)
+        user = User.get_user_by_email(email=email)
 
-        if response.status_code != 200:
-            return Response(
-                {"error": "User Not Found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        result = response.json()
-
-        email = result.get("response").get("email")
-
-        user = User.objects.get(email=email)
+        # 해당 email의 유저가 이미 있는 경우
         if user:
             if not user.is_active:
                 user.is_active = True
@@ -88,3 +60,12 @@ class NaverCallBackView(GenericAPIView):
             return Response(
                 {"message": "successful Naver Login"}, status=status.HTTP_200_OK
             )
+
+        # 새로운 유저 생성, nickname 설정 api는 따로 설계,
+        user = User.objects.create_social_user(email=email)
+        login(request, user)
+
+        return Response(
+            {"message": "successful Sign up and Login !!"},
+            status=status.HTTP_201_CREATED,
+        )

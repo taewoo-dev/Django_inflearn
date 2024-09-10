@@ -26,7 +26,7 @@ class UserRegistrationAPIView(GenericAPIView):
 
         validated_data = serializer.validated_data
 
-        user = User.objects.create_user(
+        User.objects.create_user(
             email=validated_data["email"],
             nickname=validated_data["nickname"],
             password=validated_data["password"],
