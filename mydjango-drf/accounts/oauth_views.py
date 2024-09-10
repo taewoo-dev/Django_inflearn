@@ -16,6 +16,7 @@ from accounts.oauth_serializer import (
 from accounts.services.google_social_login_service import GoogleSocialLoginService
 from accounts.services.kakao_social_login_service import KakaoSocialLoginService
 from accounts.services.naver_social_login_service import NaverSocialLoginService
+from accounts.services.user_service import UserService
 
 
 # NaverRedirectAPIView 로그인 창으로 redirect
@@ -31,6 +32,7 @@ class NaverCallBackView(GenericAPIView):
     serializer_class = NaverCallBackSerializer
     permission_classes = [AllowAny]
     social_service = NaverSocialLoginService()
+    user_service = UserService()
 
     def get(self, request: Request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.query_params)
@@ -46,7 +48,7 @@ class NaverCallBackView(GenericAPIView):
         profile_data = profile_response.get("response")
         email = profile_data.get("email")
 
-        user = self.social_service.handle_user_by_email(email)
+        user = self.user_service.handle_user_by_email(email)
 
         if user:
             login(request, user)
@@ -71,6 +73,7 @@ class KakaoCallBackView(GenericAPIView):
     serializer_class = KakaoCallBackSerializer
     permission_classes = [AllowAny]
     social_service = KakaoSocialLoginService()
+    user_service = UserService()
 
     def get(self, request: Request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.query_params)
@@ -84,7 +87,7 @@ class KakaoCallBackView(GenericAPIView):
         user_data = profile_response.get("kakao_account")
         email = user_data.get("email")
 
-        user = self.social_service.handle_user_by_email(email)
+        user = self.user_service.handle_user_by_email(email)
 
         if user:
             login(request, user)
@@ -109,6 +112,7 @@ class GoogleCallBackView(GenericAPIView):
     serializer_class = GoogleCallBackSerializer
     permission_classes = [AllowAny]
     social_service = GoogleSocialLoginService()
+    user_service = UserService()
 
     def get(self, request: Request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.query_params)
@@ -121,7 +125,7 @@ class GoogleCallBackView(GenericAPIView):
         profile_response = self.social_service.get_profile_json(access_token)
         email = profile_response.get("email")
 
-        user = self.social_service.handle_user_by_email(email)
+        user = self.user_service.handle_user_by_email(email)
 
         if user:
             login(request, user)

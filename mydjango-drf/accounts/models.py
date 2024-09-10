@@ -54,12 +54,6 @@ class User(AbstractUser):
         return self.is_admin
 
     @classmethod
-    def activate_user_by_email(cls, email: str) -> None:
-        user = cls.objects.get(email=email)
-        user.is_active = True
-        user.save()
-
-    @classmethod
     def get_user_by_email(cls, email: str) -> Optional["User"]:
         try:
             return cls.objects.get(email=email)

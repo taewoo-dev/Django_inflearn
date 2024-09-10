@@ -1,3 +1,6 @@
+# 회원가입 인증 url
+VERIFY_EMAIL_URL = "http://127.0.0.1:8000/accounts/verify/?token="
+
 # Naver Login + client_id, secret_id
 NAVER_STATE = "naver_login"
 NAVER_SCOPE = ""

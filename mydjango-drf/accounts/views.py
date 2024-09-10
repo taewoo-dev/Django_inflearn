@@ -13,6 +13,7 @@ from accounts.models import User
 from accounts.serializers import UserRegistrationSerializer, UserLoginSerializer
 from accounts.services.email_service import EmailService
 from accounts.services.token_service import TokenService
+from accounts.services.user_service import UserService
 
 
 # 회원가입 API
@@ -20,6 +21,7 @@ class UserRegistrationAPIView(GenericAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
     email_service = EmailService()
+    user_service = UserService()
 
     def post(self, request: Request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.data)
@@ -27,20 +29,16 @@ class UserRegistrationAPIView(GenericAPIView):
 
         validated_data = serializer.validated_data
 
-        User.objects.create_user(
+        self.user_service.create_common_user_by_email(
             email=validated_data["email"],
             nickname=validated_data["nickname"],
             password=validated_data["password"],
         )
 
         email = validated_data.get("email")
-        scheme = self.request.scheme
-        meta = self.request.META
 
         token = self.email_service.create_signed_email_token(email)
-        subject, message = self.email_service.get_verification_email_content(
-            scheme, meta, token
-        )
+        subject, message = self.email_service.get_verification_email_content(token)
         self.email_service.send_email(subject, message, email)
 
         data = {
@@ -56,13 +54,14 @@ class UserRegistrationAPIView(GenericAPIView):
 class VerifyEmailAPIView(APIView):
     permission_classes = [AllowAny]
     email_service = EmailService()
+    user_service = UserService()
 
     def get(self, request: Request, *args, **kwargs) -> Response:
         token = request.GET.get("token", "")
 
         try:
             email = self.email_service.validate_email_token(token=token)
-            User.activate_user_by_email(email=email)
+            self.user_service.activate_user_by_email(email=email)
             return Response(
                 {"message": "Email verified successfully."}, status=status.HTTP_200_OK
             )

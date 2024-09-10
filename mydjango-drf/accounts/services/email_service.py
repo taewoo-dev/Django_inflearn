@@ -3,6 +3,8 @@ from django.core import signing
 from django.core.mail import send_mail
 from django.core.signing import TimestampSigner
 
+from accounts.constants import VERIFY_EMAIL_URL
+
 
 class EmailService:
     signer = TimestampSigner()
@@ -16,10 +18,8 @@ class EmailService:
         return self.signer.unsign(decoded_user_email, max_age=60 * 10)
 
     @staticmethod
-    def get_verification_email_content(
-        scheme: str, meta: dict, token: str
-    ) -> tuple[str, str]:
-        url = f"{scheme}://{meta['HTTP_HOST']}/accounts/verify/?token={token}"
+    def get_verification_email_content(token: str) -> tuple[str, str]:
+        url = VERIFY_EMAIL_URL + token
         subject = "이메일 인증을 완료해주세요"
         message = f"다음 링크를 클릭해 주세요. {url}"
 

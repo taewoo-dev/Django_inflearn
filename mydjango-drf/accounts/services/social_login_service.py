@@ -60,15 +60,3 @@ class SocialLoginService(ABC):
             "Authorization": f"Bearer {access_token}",
         }
         return headers
-
-    def handle_user_by_email(self, email: str) -> Optional[User]:
-        """
-        이메일로 유저를 조회하고, 없으면 새 유저 생성 (소셜 로그인 유저).
-        """
-        user = User.get_user_by_email(email=email)
-        if user and not user.is_active:
-            user.is_active = True
-            user.save()
-        elif not user:
-            user = User.objects.create_social_user(email=email)
-        return user
