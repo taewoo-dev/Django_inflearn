@@ -11,7 +11,8 @@ from rest_framework.views import APIView
 
 from accounts.models import User
 from accounts.serializers import UserRegistrationSerializer, UserLoginSerializer
-from accounts.services import TokenService, EmailService
+from accounts.services.email_service import EmailService
+from accounts.services.token_service import TokenService
 
 
 # 회원가입 API

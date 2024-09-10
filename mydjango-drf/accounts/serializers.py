@@ -1,9 +1,7 @@
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.password_validation import validate_password
-from django.db.models import QuerySet
+from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework_simplejwt.serializers import TokenObtainSerializer
+
 
 from blog.mixins import PermissionDebugMixin
 from .models import User

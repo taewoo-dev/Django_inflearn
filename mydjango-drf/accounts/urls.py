@@ -1,6 +1,10 @@
 from django.urls import path, include
-from . import views
-from .oauth_views import NaverLoginRedirectView, NaverCallBackView
+from .oauth_views import (
+    NaverLoginRedirectView,
+    NaverCallBackView,
+    KakaoLoginRedirectView,
+    KakaoCallBackView,
+)
 from .views import (
     UserRegistrationAPIView,
     PasswordChangeAPIView,
@@ -35,5 +39,13 @@ urlpatterns = [
     path(
         "naver/login", NaverLoginRedirectView.as_view(), name="naver-login"
     ),  # Naver Login
-    path("naver/callback/", NaverCallBackView.as_view(), name="naver-callback"),
+    path(
+        "naver/callback/", NaverCallBackView.as_view(), name="naver-callback"
+    ),  # Naver Callback
+    path(
+        "kakao/login", KakaoLoginRedirectView.as_view(), name="kakao-login"
+    ),  # Kakao Login
+    path(
+        "kakao/callback/", KakaoCallBackView.as_view(), name="naver-callback"
+    ),  # KaKao Callback
 ]
