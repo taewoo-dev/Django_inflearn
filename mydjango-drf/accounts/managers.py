@@ -36,17 +36,3 @@ class UserManger(BaseUserManager):
         user.is_active = True  # 소셜 로그인 시 바로 활성화
         user.save(using=self._db)
         return user
-
-
-# class AuthenticationManager:
-#
-#     token_service = TokenService()
-#     email_service = EmailService()
-#
-#     self.token_service.blacklist_refresh_token(refresh_token)
-#
-#     def get_token(self, user: User) -> Tuple[str, str]:
-#         return self.token_service.generate_jwt_token(user)
-#
-#     def handle_email_verification(self, user: User):
-#         pass

@@ -7,7 +7,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from accounts.models import User
 from accounts.oauth_serializer import (
     NaverCallBackSerializer,
     KakaoCallBackSerializer,
@@ -48,7 +47,7 @@ class NaverCallBackView(GenericAPIView):
         profile_data = profile_response.get("response")
         email = profile_data.get("email")
 
-        user = self.user_service.handle_user_by_email(email)
+        user = self.user_service.get_or_create_social_user_by_email(email)
 
         if user:
             login(request, user)
@@ -87,7 +86,7 @@ class KakaoCallBackView(GenericAPIView):
         user_data = profile_response.get("kakao_account")
         email = user_data.get("email")
 
-        user = self.user_service.handle_user_by_email(email)
+        user = self.user_service.get_or_create_social_user_by_email(email)
 
         if user:
             login(request, user)
@@ -125,7 +124,7 @@ class GoogleCallBackView(GenericAPIView):
         profile_response = self.social_service.get_profile_json(access_token)
         email = profile_response.get("email")
 
-        user = self.user_service.handle_user_by_email(email)
+        user = self.user_service.get_or_create_social_user_by_email(email)
 
         if user:
             login(request, user)
