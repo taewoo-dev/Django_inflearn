@@ -4,6 +4,8 @@ from urllib.parse import urlencode
 import requests
 from django.core import signing
 
+from config.settings import GOOGLE_CLIENT_ID
+
 
 class SocialLoginService(ABC):
 

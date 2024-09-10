@@ -8,7 +8,12 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from accounts.models import User
-from accounts.oauth_serializer import NaverCallBackSerializer, KakaoCallBackSerializer
+from accounts.oauth_serializer import (
+    NaverCallBackSerializer,
+    KakaoCallBackSerializer,
+    GoogleCallBackSerializer,
+)
+from accounts.services.google_social_login_service import GoogleSocialLoginService
 from accounts.services.kakao_social_login_service import KakaoSocialLoginService
 from accounts.services.naver_social_login_service import NaverSocialLoginService
 
@@ -66,6 +71,7 @@ class NaverCallBackView(GenericAPIView):
         )
 
 
+# KakaoRedirectAPIView 로그인 창으로 redirect
 class KakaoLoginRedirectView(RedirectView):
     social_service = KakaoSocialLoginService()
 
@@ -73,6 +79,7 @@ class KakaoLoginRedirectView(RedirectView):
         return self.social_service.generate_login_url()
 
 
+# KakaoCallBackAPIView 로그인 and 회원가입
 class KakaoCallBackView(GenericAPIView):
     serializer_class = KakaoCallBackSerializer
     permission_classes = [AllowAny]
@@ -93,6 +100,59 @@ class KakaoCallBackView(GenericAPIView):
         user_data = profile_response.get("kakao_account")
 
         email = user_data.get("email")
+
+        user = User.get_user_by_email(email=email)
+        if user:
+            if not user.is_active:
+                user.is_active = True
+                user.save()
+            login(request, user)
+            return Response(
+                {"message": "successful Kakao Login"}, status=status.HTTP_200_OK
+            )
+
+        user = User.objects.create_social_user(email=email)
+        login(request, user)
+
+        return Response(
+            {"message": "successful Sign up and Login !!"},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+# GoogleRedirectAPIView 로그인 창으로 redirect
+class GoogleLoginRedirectView(RedirectView):
+    social_service = GoogleSocialLoginService()
+
+    def get_redirect_url(self, *args, **kwargs) -> str:
+        return self.social_service.generate_login_url()
+
+
+# GoogleCallBackAPIView 로그인 and 회원가입
+class GoogleCallBackView(GenericAPIView):
+    serializer_class = GoogleCallBackSerializer
+    permission_classes = [AllowAny]
+    social_service = GoogleSocialLoginService()
+
+    def get(self, request: Request, *args, **kwargs) -> Response:
+        serializer = self.get_serializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        validated_data = serializer.validated_data
+
+        code = validated_data.get("code")
+
+        access_token = self.social_service.get_access_token(code)
+
+        print(access_token)
+
+        profile_response = self.social_service.get_profile_json(access_token)
+
+        print(profile_response)
+
+        email = profile_response.get("email")
+
+        print(email)
 
         user = User.get_user_by_email(email=email)
         if user:

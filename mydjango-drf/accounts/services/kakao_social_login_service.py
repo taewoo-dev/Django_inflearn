@@ -9,13 +9,13 @@ from accounts.constants import (
     KAKAO_PROFILE_URL,
 )
 from accounts.services.social_login_service import SocialLoginService
-from config.settings import KAKAO_CLIENT_ID, KAKAO_SECRET
+from django.conf import settings
 
 
 class KakaoSocialLoginService(SocialLoginService):
 
-    _client_id: str = KAKAO_CLIENT_ID
-    _secret_id: str = KAKAO_SECRET
+    _client_id: str = settings.KAKAO_CLIENT_ID
+    _secret_id: str = settings.KAKAO_SECRET
     _callback_url: str = KAKAO_CALLBACK_URL
     _state: str = KAKAO_STATE
     _scope: str = KAKAO_SCOPE

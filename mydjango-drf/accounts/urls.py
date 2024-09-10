@@ -4,6 +4,8 @@ from .oauth_views import (
     NaverCallBackView,
     KakaoLoginRedirectView,
     KakaoCallBackView,
+    GoogleLoginRedirectView,
+    GoogleCallBackView,
 )
 from .views import (
     UserRegistrationAPIView,
@@ -48,4 +50,10 @@ urlpatterns = [
     path(
         "kakao/callback/", KakaoCallBackView.as_view(), name="naver-callback"
     ),  # KaKao Callback
+    path(
+        "google/login", GoogleLoginRedirectView.as_view(), name="google-login"
+    ),  # Google Login
+    path(
+        "google/callback/", GoogleCallBackView.as_view(), name="google-callback"
+    ),  # Google Callback
 ]

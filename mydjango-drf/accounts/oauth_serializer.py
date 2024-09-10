@@ -1,7 +1,7 @@
 from django.core import signing
 from rest_framework import serializers
 
-from accounts.constants import KAKAO_STATE, NAVER_STATE
+from accounts.constants import KAKAO_STATE, NAVER_STATE, GOOGLE_STATE
 
 
 class SocialCallBackSerializer(serializers.Serializer):
@@ -32,3 +32,9 @@ class KakaoCallBackSerializer(SocialCallBackSerializer):
     def get_expected_state(self) -> str:
         # 카카오 전용 state 값 반환
         return KAKAO_STATE
+
+
+class GoogleCallBackSerializer(SocialCallBackSerializer):
+    def get_expected_state(self) -> str:
+        # 구글 전용 state 값 반환
+        return GOOGLE_STATE
